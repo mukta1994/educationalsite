@@ -229,10 +229,10 @@ subQue=[];
     }
     this.counts=count;
 
-    // var submittedFile = new Blob([document.getElementById('excelData').innerHTML], {
-    //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
-    //   });
-    // saveAs(submittedFile , "(test).xls");
+    var submittedFile = new Blob([document.getElementById('excelData').innerHTML], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+      });
+    saveAs(submittedFile , "(test).xls");
 
     // alert(count + " answer(s) are correct out of " + this.subQue.length)
   }
