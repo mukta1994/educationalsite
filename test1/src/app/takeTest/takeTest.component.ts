@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { answers } from './interfaces/answers.interface';
 import { questions } from './interfaces/questions.interface';
-import { ToastrService } from 'ngx-toastr';  
+import { ToastrService } from 'ngx-toastr';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'ts-xlsx';
 
@@ -15,19 +15,23 @@ export class HomeComponent implements OnInit {
 
   constructor(private toastr: ToastrService) { }
 
-  subject:string;
+  subject: string;
   title = 'test1';
-  subjects=["maths","science"]
+  subjects = ["maths", "science"]
   ans: answers[] = [];
   viewAnswer = false;
-  submitted=false
+  submitted = false;
+  timer: any;
+  display = false;
+  counts: any;
 
-  //obj=[];
-  ngOnInit(){
-    this.subject="maths";
+  //function called on page loading
+  ngOnInit() {
+    this.subject = "maths";
     this.filteredQuestionsList("maths")
   }
-  
+
+  //json data for multiple choice questions
   obj: any[] = [
     {
       "qid": "1",
@@ -43,7 +47,7 @@ export class HomeComponent implements OnInit {
         "num": "8", "selected": false
       }],
       "answer": "4"
-    }, 
+    },
     {
       "qid": "2",
       "subject": "maths",
@@ -120,68 +124,19 @@ export class HomeComponent implements OnInit {
       "answer": "7 colors"
     }
   ];
-   isTrue = true;
-subQue=[];
+  isTrue = true;
+  subQue = [];
 
 
-// arrayBuffer:any;
-// file:File;
-// incomingfile(event) 
-//   {
-//     console.log(event);
-//   this.file= event.target.files[0]; 
-//   }
-
-//   newJson:questions[]=[];
-//   optionList=[]
-//   testingJson=[];
-  
-//  Upload() {
-//       let fileReader = new FileReader();
-//         fileReader.onload = (e) => {
-//             this.arrayBuffer = fileReader.result;
-//             var data = new Uint8Array(this.arrayBuffer);
-//             var arr = new Array();
-//             for(var i = 0; i != data.length; ++i) arr[i] = String.fromCharCode(data[i]);
-//             var bstr = arr.join("");
-//             var workbook = XLSX.read(bstr, {type:"binary"});
-//             var first_sheet_name = workbook.SheetNames[0];
-//             var worksheet = workbook.Sheets[first_sheet_name];
-//             console.log(XLSX.utils.sheet_to_json(worksheet,{raw:true}));
-//             this.testingJson=XLSX.utils.sheet_to_json(worksheet,{raw:true});
-
-//             for(var k=0;k<this.testingJson.length;k++){
-//               this.optionList=[];
-//               this.optionList.push({num:this.testingJson[k].opt1,selected:false});
-//                             this.optionList.push({num:this.testingJson[k].opt2,selected:false})
-//                             this.optionList.push({num:this.testingJson[k].opt3,selected:false})
-//                             this.optionList.push({num:this.testingJson[k].opt4,selected:false})
-
-//               this.newJson.push({ qid: this.testingJson[k].questionId, question: this.testingJson[k].question, 
-//                             answer:this.testingJson[k].answer,subject:this.testingJson[k].subject,opt:this.optionList });
-                            
-//             }
-//             this.obj=this.newJson;
-//             console.log(this.newJson)
-//             this.filteredQuestionsList("maths");
-//         }
-//         fileReader.readAsArrayBuffer(this.file);
-// }
-
-
-
-
-
-
-
-
-
+  //Filter questions on the basis of subjects
   filteredQuestionsList(subjectt) {
-    this.subQue= this.obj.filter(v => v.subject === subjectt)
+    this.subQue = this.obj.filter(v => v.subject === subjectt);
+    this.submitted=false;
     console.log(this.subQue)
-}
+  }
 
-  toggleChild(name: string, id: string, list: Array<string>, selected) {
+  //function to make Only one checkbox is checked
+  selecOnecheckBox(name: string, id: string, list: Array<string>, selected) {
     const queInd = this.subQue.findIndex(e => e.qid === id)
     for (var i = 0; i < 4; i++) {
       if (name == this.subQue[queInd].opt[i].num) {
@@ -189,8 +144,6 @@ subQue=[];
           this.subQue[queInd].opt[i].selected = true;
         else
           this.subQue[queInd].opt[i].selected = false;
-
-
         const ind = this.ans.findIndex(e => e.qid === this.subQue[queInd].qid)
         if (ind >= 0 && this.subQue[queInd].opt[i].selected) {
           //this.ans[ind].sanswer=this.obj[id].options[i].num
@@ -201,45 +154,86 @@ subQue=[];
             this.ans.push({ qid: id, sanswer: name, canswer: this.subQue[queInd].answer })
           else
             this.ans.splice(ind, 1);
-
         }
       }
 
       else
         this.subQue[queInd].opt[i].selected = false;
     }
-
     //console.log(this.ans);
   }
-  timer:any;
-  display=false;
-  counts:any;
+
+
+  //function called on clicking submit button to submit answers
   onSubmit() {
     this.toastr.success("Submitted successfully");
     this.display = true;
-        this.submitted=true;
+    this.submitted = true;
     var count = 0;
     this.timer = setTimeout(() => {
       this.display = false;
-  }, 2000);
+    }, 2000);
     for (var j = 0; j < this.ans.length; j++) {
       if (this.ans[j].canswer == this.ans[j].sanswer) {
         count++;
       }
     }
-    this.counts=count;
+    this.counts = count;
 
+    //save the sbmitted answers as xls file
     var submittedFile = new Blob([document.getElementById('excelData').innerHTML], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
-      });
-    saveAs(submittedFile , "(test).xls");
-
-    // alert(count + " answer(s) are correct out of " + this.subQue.length)
+    });
+    saveAs(submittedFile, "(test).xls");
   }
- 
+
+  //function to view answers 
   viewAns() {
     this.viewAnswer = !this.viewAnswer;
   }
-
-
 }
+
+
+  // arrayBuffer:any;
+  // file:File;
+  // incomingfile(event) 
+  //   {
+  //     console.log(event);
+  //   this.file= event.target.files[0]; 
+  //   }
+
+  //   newJson:questions[]=[];
+  //   optionList=[]
+  //   testingJson=[];
+
+  //  Upload() {
+  //       let fileReader = new FileReader();
+  //         fileReader.onload = (e) => {
+  //             this.arrayBuffer = fileReader.result;
+  //             var data = new Uint8Array(this.arrayBuffer);
+  //             var arr = new Array();
+  //             for(var i = 0; i != data.length; ++i) arr[i] = String.fromCharCode(data[i]);
+  //             var bstr = arr.join("");
+  //             var workbook = XLSX.read(bstr, {type:"binary"});
+  //             var first_sheet_name = workbook.SheetNames[0];
+  //             var worksheet = workbook.Sheets[first_sheet_name];
+  //             console.log(XLSX.utils.sheet_to_json(worksheet,{raw:true}));
+  //             this.testingJson=XLSX.utils.sheet_to_json(worksheet,{raw:true});
+
+  //             for(var k=0;k<this.testingJson.length;k++){
+  //               this.optionList=[];
+  //               this.optionList.push({num:this.testingJson[k].opt1,selected:false});
+  //                             this.optionList.push({num:this.testingJson[k].opt2,selected:false})
+  //                             this.optionList.push({num:this.testingJson[k].opt3,selected:false})
+  //                             this.optionList.push({num:this.testingJson[k].opt4,selected:false})
+
+  //               this.newJson.push({ qid: this.testingJson[k].questionId, question: this.testingJson[k].question, 
+  //                             answer:this.testingJson[k].answer,subject:this.testingJson[k].subject,opt:this.optionList });
+
+  //             }
+  //             this.obj=this.newJson;
+  //             console.log(this.newJson)
+  //             this.filteredQuestionsList("maths");
+  //         }
+  //         fileReader.readAsArrayBuffer(this.file);
+  // }

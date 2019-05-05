@@ -16,7 +16,7 @@
       
     <div  *ngFor="let item of  subQue">
       <p>{{ item.question }}</p>
-      <p *ngFor="let res of  item.opt"> <input type="checkbox" [checked]="res.selected" [disabled]="viewAnswer" (change)="toggleChild(res.num,item.qid,item.opt,res.selected)"/>{{res.num}}</p>
+      <p *ngFor="let res of  item.opt"> <input type="checkbox" [checked]="res.selected" [disabled]="viewAnswer" (change)="selecOnecheckBox(res.num,item.qid,item.opt,res.selected)"/>{{res.num}}</p>
       <!-- <mat-radio-button *ngFor="let res of  item.options" value=res>{{res}} </mat-radio-button> -->
      <!-- <p *ngIf="viewAnswer">answer {{item.answer}}</p> -->
      <hr>
